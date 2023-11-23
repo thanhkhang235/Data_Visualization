@@ -1,0 +1,153 @@
+---
+title: "My answers"
+author: "Khang Nguyen Thanh"
+date: "2023-11-06"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(conflicted)
+library(forcats)
+library(scales)
+library(plotly)
+library(leaflet)
+library(maps)
+```
+
+
+## Data 
+
+```{r}
+df1 <- read.csv("data/incidents.csv")
+df1 
+distinct_count <- df1 |>
+  summarise(distinct_values = n_distinct(State))
+distinct_count
+```
+
+```{r}
+df2 <- read.csv("data/state.csv")
+df2
+```
+
+```{r}
+data <- left_join(df1,
+          df2, 
+          join_by( State == state_code)) 
+data
+
+```
+```{r}
+count(data,Smoke.alarms, sort= TRUE)
+count(data,Cause, sort= TRUE)
+count(data,Residential.building.type, sort = TRUE)
+count(data,MFI, sort = TRUE)
+```
+
+
+```{r}
+# Plotting Cause
+data |> 
+  group_by(Cause) |>
+  filter(n() > 120) |> 
+  ggplot(aes(y = fct_rev(fct_infreq(Cause)),fill=Cause)) +
+  guides(fill = FALSE) +  # remove legend for fill 
+  geom_bar() +
+  geom_text(stat="count",aes(label = scales::comma(after_stat(count))), vjust = -0.5,size = 3) +
+  labs(title = "Type of Cause of Fire",
+       x = "Count",
+       y = "Causes") +
+  theme_classic() 
+```
+
+```{r}
+# Scatter plot for Age vs. Percent of Total Population affected
+ggplot(data, aes(x = Age.demographic, y = percent_of_total)) +
+  geom_point() +
+  labs(title = "Age vs. Percent of Total Population Affected by Fires", x = "Age", y = "Percent of Total Population")
+
+```
+
+```{r}
+# Calculate counts per state
+state_counts <- fire_data |>
+  count(state) |>
+  arrange(desc(n))  # Sort in descending order by count
+
+# Sort the original data frame by state counts
+fire_data_sorted <- fire_data |>
+  mutate(state = factor(state, levels = state_counts$state))  
+
+# Create an interactive bar chart for state-wise incidents sorted by count
+plot_ly(data = fire_data_sorted, x = ~state) |>
+  add_trace(type = 'histogram', marker = list(color = ~state)) |>
+  layout(title = "State-wise Home Fire Incidents (Sorted by Count)")
+
+```
+
+```{r}
+df3 <- read.csv("data/Census.csv")
+df3
+```
+```{r}
+join <-  left_join(data,
+          df3, 
+          join_by( state ==STATE)) 
+fire_data <- subset(join, select = -c(State))
+fire_data
+```
+
+
+```{r}
+state_counts <- fire_data |>
+  count(state) |>
+  rename(region = state, incident_count = n)
+state_counts
+```
+
+
+```{r}
+# Aggregate incident counts per state
+state_counts <- fire_data |>
+  count(State = tools::toTitleCase(state)) |>
+  rename(region = State, incident_count = n)
+
+# Get the US state map data
+us_map <- map_data("state")
+
+# Harmonize state names in the map data
+us_map$region <- tools::toTitleCase(us_map$region)
+
+# Merge the incident counts with map data
+merged_data <- us_map |>
+  left_join(state_counts, by = c("region" = "region"))
+```
+
+
+```{r}
+
+# Plotting the map with incident counts
+ggplot() +
+  geom_map(data = merged_data, map = merged_data,
+           aes(map_id = region, fill = incident_count),
+           color = "black") +
+  expand_limits(x = merged_data$long, y = merged_data$lat) +
+  scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
+                      name = "Incident Count", guide = "colorbar") +
+  labs(title = "Home Fire Incidents Across US States") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+```
+
+
+
+
+`
+
+
+
+
+
