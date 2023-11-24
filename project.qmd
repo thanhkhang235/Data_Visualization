@@ -164,4 +164,54 @@ data |>
        y = "Type") +
   theme_classic() 
 ```
+```{r}
+# Distribution of age demographic
+ggplot(data, aes(x = "", y = Age.demographic)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(title = "Distribution of Age Demographics (Boxplot)",
+       x = "",
+       y = "Age Demographic") +
+  theme_minimal()
+```
+
+```{r}
+# Age vs Cause: top 5 only 
+
+fire_data_filtered <- data |>
+  filter(Cause != "Under investigation" & Cause != "Undetermined") |>
+  group_by(Cause) |>
+  summarise(Count = n()) |>
+  top_n(5, Count) |>
+  pull(Cause)
+
+# Filter data for only the top 5 causes
+top_causes <- data |>
+  filter(Cause %in% fire_data_filtered)
+
+# Plotting Age Demographic vs. Cause for top 5 causes
+ggplot(top_causes, aes(x = Age.demographic, fill = Cause)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Relationship between Age Demographic and Top 5 Causes of Incidents",
+       x = "Age Demographic",
+       y = "Count") +
+  theme_minimal()
+```
+```{r}
+
+fire_data <- data |>
+  mutate(Incident_Date = as.Date(Date, format = "%m/%d/%Y")) |>
+  mutate(Incident_Year = lubridate::year(Incident_Date)) |>
+  filter(!is.na(Incident_Year)) |>
+  filter(Cause != "Under investigation" & Cause != "Undetermined") |>
+  group_by(Incident_Year, Cause) |>
+  count(Cause)
+
+causes_time <- ggplot(fire_data, aes(x = Incident_Year, y = n, fill = Cause)) +
+  geom_col(position = "stack") +
+  labs(x = "Year of Incident", y = "Count", title = "Causes of Fire Incidents Since 2012") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+causes_time
+```
 
