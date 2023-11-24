@@ -45,6 +45,22 @@ count(data,Residential.building.type, sort = TRUE)
 count(data,MFI, sort = TRUE)
 ```
 
+```{r}
+# Test 
+# df3 <- read.csv("data/Census.csv")
+# df3
+```
+```{r}
+#join <-  left_join(data,
+#          df3, 
+#          join_by( state ==STATE)) 
+#fire_data <- subset(join, select = -c(State))
+# fire_data
+```
+
+
+
+## Basic Plots
 
 ```{r}
 # Plotting Cause
@@ -61,6 +77,8 @@ data |>
   theme_classic() 
 ```
 
+
+
 ```{r}
 # Scatter plot for Age vs. Percent of Total Population affected
 ggplot(data, aes(x = Age.demographic, y = percent_of_total)) +
@@ -71,12 +89,12 @@ ggplot(data, aes(x = Age.demographic, y = percent_of_total)) +
 
 ```{r}
 # Calculate counts per state
-state_counts <- fire_data |>
+state_counts <- data |>
   count(state) |>
   arrange(desc(n))  # Sort in descending order by count
 
 # Sort the original data frame by state counts
-fire_data_sorted <- fire_data |>
+fire_data_sorted <- data |>
   mutate(state = factor(state, levels = state_counts$state))  
 
 # Create an interactive bar chart for state-wise incidents sorted by count
@@ -86,21 +104,11 @@ plot_ly(data = fire_data_sorted, x = ~state) |>
 
 ```
 
-```{r}
-df3 <- read.csv("data/Census.csv")
-df3
-```
-```{r}
-join <-  left_join(data,
-          df3, 
-          join_by( state ==STATE)) 
-fire_data <- subset(join, select = -c(State))
-fire_data
-```
+
 
 
 ```{r}
-state_counts <- fire_data |>
+state_counts <- data |>
   count(state) |>
   rename(region = state, incident_count = n)
 state_counts
@@ -109,7 +117,7 @@ state_counts
 
 ```{r}
 # Aggregate incident counts per state
-state_counts <- fire_data |>
+state_counts <- data |>
   count(State = tools::toTitleCase(state)) |>
   rename(region = State, incident_count = n)
 
@@ -143,11 +151,17 @@ ggplot() +
 ```
 
 
-
-
-`
-
-
-
-
+```{r}
+# Fire by general property type 
+data |> 
+  group_by(Residential.building.type) |>
+  ggplot(aes(y = fct_rev(fct_infreq(Residential.building.type)),fill=Residential.building.type)) +
+  guides(fill = FALSE) +  # remove legend for fill 
+  geom_bar() +
+  geom_text(stat="count",aes(label = scales::comma(after_stat(count))), vjust = -0.5,size = 3) +
+  labs(title = "Type of resident",
+       x = "Count",
+       y = "Type") +
+  theme_classic() 
+```
 
