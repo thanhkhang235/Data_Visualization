@@ -1,5 +1,5 @@
 ---
-title: "My answers"
+title: "My project"
 author: "Khang Nguyen Thanh"
 date: "2023-11-06"
 output: html_document
@@ -45,18 +45,8 @@ count(data,Residential.building.type, sort = TRUE)
 count(data,MFI, sort = TRUE)
 ```
 
-```{r}
-# Test 
-# df3 <- read.csv("data/Census.csv")
-# df3
-```
-```{r}
-#join <-  left_join(data,
-#          df3, 
-#          join_by( state ==STATE)) 
-#fire_data <- subset(join, select = -c(State))
-# fire_data
-```
+
+
 
 
 
@@ -79,13 +69,7 @@ data |>
 
 
 
-```{r}
-# Scatter plot for Age vs. Percent of Total Population affected
-ggplot(data, aes(x = Age.demographic, y = percent_of_total)) +
-  geom_point() +
-  labs(title = "Age vs. Percent of Total Population Affected by Fires", x = "Age", y = "Percent of Total Population")
 
-```
 
 ```{r}
 # Calculate counts per state
@@ -213,5 +197,26 @@ causes_time <- ggplot(fire_data, aes(x = Incident_Year, y = n, fill = Cause)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank())
 causes_time
+```
+```{r}
+# Look at the top 5 specifically 
+# Extract top 5 causes
+top_causes <- fire_data %>%
+  group_by(Cause) %>%
+  summarise(total_count = sum(n)) %>%
+  top_n(5, total_count) %>%
+  pull(Cause)
+
+# Filter data for top 5 causes
+filtered_data <- fire_data %>%
+  filter(Cause %in% top_causes)
+
+# Plotting the change in top 5 causes over years
+ ggplot(filtered_data, aes(x = Incident_Year, y = n, color = Cause)) +
+  geom_line() +
+  labs(x = "Year of Incident", y = "Count", title = "Top 5 Causes of Fire Incidents Over the Years") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
 ```
 
