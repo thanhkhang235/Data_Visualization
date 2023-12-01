@@ -21,9 +21,6 @@ library(maps)
 ```{r}
 df1 <- read.csv("data/incidents.csv")
 df1 
-distinct_count <- df1 |>
-  summarise(distinct_values = n_distinct(State))
-distinct_count
 ```
 
 ```{r}
@@ -44,10 +41,6 @@ count(data,Cause, sort= TRUE)
 count(data,Residential.building.type, sort = TRUE)
 count(data,MFI, sort = TRUE)
 ```
-
-
-
-
 
 
 ## Basic Plots
@@ -148,15 +141,7 @@ data |>
        y = "Type") +
   theme_classic() 
 ```
-```{r}
-# Distribution of age demographic
-ggplot(data, aes(x = "", y = Age.demographic)) +
-  geom_boxplot(fill = "skyblue", color = "black") +
-  labs(title = "Distribution of Age Demographics (Boxplot)",
-       x = "",
-       y = "Age Demographic") +
-  theme_minimal()
-```
+
 
 ```{r}
 # Age vs Cause: top 5 only 
