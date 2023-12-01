@@ -4,6 +4,7 @@ author: "Khang Nguyen Thanh"
 date: "2023-11-06"
 output: html_document
 ---
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -15,8 +16,7 @@ library(leaflet)
 library(maps)
 ```
 
-
-## Data 
+## Data
 
 ```{r}
 df1 <- read.csv("data/incidents.csv")
@@ -35,13 +35,13 @@ data <- left_join(df1,
 data
 
 ```
+
 ```{r}
 count(data,Smoke.alarms, sort= TRUE)
 count(data,Cause, sort= TRUE)
 count(data,Residential.building.type, sort = TRUE)
 count(data,MFI, sort = TRUE)
 ```
-
 
 ## Basic Plots
 
@@ -60,74 +60,6 @@ data |>
   theme_classic() 
 ```
 
-
-
-
-
-```{r}
-# Calculate counts per state
-state_counts <- data |>
-  count(state) |>
-  arrange(desc(n))  # Sort in descending order by count
-
-# Sort the original data frame by state counts
-fire_data_sorted <- data |>
-  mutate(state = factor(state, levels = state_counts$state))  
-
-# Create an interactive bar chart for state-wise incidents sorted by count
-plot_ly(data = fire_data_sorted, x = ~state) |>
-  add_trace(type = 'histogram', marker = list(color = ~state)) |>
-  layout(title = "State-wise Home Fire Incidents (Sorted by Count)")
-
-```
-
-
-
-
-```{r}
-state_counts <- data |>
-  count(state) |>
-  rename(region = state, incident_count = n)
-state_counts
-```
-
-
-```{r}
-# Aggregate incident counts per state
-state_counts <- data |>
-  count(State = tools::toTitleCase(state)) |>
-  rename(region = State, incident_count = n)
-
-# Get the US state map data
-us_map <- map_data("state")
-
-# Harmonize state names in the map data
-us_map$region <- tools::toTitleCase(us_map$region)
-
-# Merge the incident counts with map data
-merged_data <- us_map |>
-  left_join(state_counts, by = c("region" = "region"))
-```
-
-
-```{r}
-
-# Plotting the map with incident counts
-ggplot() +
-  geom_map(data = merged_data, map = merged_data,
-           aes(map_id = region, fill = incident_count),
-           color = "black") +
-  expand_limits(x = merged_data$long, y = merged_data$lat) +
-  scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
-                      name = "Incident Count", guide = "colorbar") +
-  labs(title = "Home Fire Incidents Across US States") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-
-
-```
-
-
 ```{r}
 # Fire by general property type 
 data |> 
@@ -142,29 +74,6 @@ data |>
   theme_classic() 
 ```
 
-
-```{r}
-# Age vs Cause: top 5 only 
-
-fire_data_filtered <- data |>
-  filter(Cause != "Under investigation" & Cause != "Undetermined") |>
-  group_by(Cause) |>
-  summarise(Count = n()) |>
-  top_n(5, Count) |>
-  pull(Cause)
-
-# Filter data for only the top 5 causes
-top_causes <- data |>
-  filter(Cause %in% fire_data_filtered)
-
-# Plotting Age Demographic vs. Cause for top 5 causes
-ggplot(top_causes, aes(x = Age.demographic, fill = Cause)) +
-  geom_bar(position = "dodge") +
-  labs(title = "Relationship between Age Demographic and Top 5 Causes of Incidents",
-       x = "Age Demographic",
-       y = "Count") +
-  theme_minimal()
-```
 ```{r}
 
 fire_data <- data |>
@@ -182,7 +91,11 @@ causes_time <- ggplot(fire_data, aes(x = Incident_Year, y = n, fill = Cause)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank())
 causes_time
+
+# find a way to adjust the color => read the book 
+# or find a different type of map to show it ???
 ```
+
 ```{r}
 # Look at the top 5 specifically 
 # Extract top 5 causes
@@ -205,3 +118,85 @@ filtered_data <- fire_data %>%
         panel.background = element_blank())
 ```
 
+```{r}
+# Age vs Cause: top 5 only 
+
+fire_data_filtered <- data |>
+  filter(Cause != "Under investigation" & Cause != "Undetermined") |>
+  group_by(Cause) |>
+  summarise(Count = n()) |>
+  top_n(5, Count) |>
+  pull(Cause)
+
+# Filter data for only the top 5 causes
+top_causes <- data |>
+  filter(Cause %in% fire_data_filtered)
+
+# Plotting Age Demographic vs. Cause for top 5 causes
+ggplot(top_causes, aes(x = Age.demographic, fill = Cause)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Relationship between Age Demographic and Top 5 Causes of Incidents",
+       x = "Age Demographic",
+       y = "Count") +
+  theme_minimal() # heatmap instead
+```
+
+```{r}
+state_counts <- data |>
+  count(state) |>
+  rename(region = state, incident_count = n)
+state_counts
+```
+
+```{r}
+# Aggregate incident counts per state
+state_counts <- data |>
+  count(State = tools::toTitleCase(state)) |>
+  rename(region = State, incident_count = n)
+
+# Get the US state map data
+us_map <- map_data("state")
+
+# Harmonize state names in the map data
+us_map$region <- tools::toTitleCase(us_map$region)
+
+# Merge the incident counts with map data
+merged_data <- us_map |>
+  left_join(state_counts, by = c("region" = "region"))
+```
+
+```{r}
+
+# Plotting the map with incident counts
+ggplot() +
+  geom_map(data = merged_data, map = merged_data,
+           aes(map_id = region, fill = incident_count),
+           color = "black") +
+  expand_limits(x = merged_data$long, y = merged_data$lat) +
+  scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
+                      name = "Incident Count", guide = "colorbar") +
+  labs(title = "Home Fire Incidents Across US States") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# why one state has more incidents than others => population + type of resident 
+# => investigate that to go further => answer this question 
+
+```
+
+```{r}
+# Calculate counts per state
+state_counts <- data |>
+  count(state) |>
+  arrange(desc(n))  # Sort in descending order by count
+
+# Sort the original data frame by state counts
+fire_data_sorted <- data |>
+  mutate(state = factor(state, levels = state_counts$state))  
+
+# Create an interactive bar chart for state-wise incidents sorted by count
+plot_ly(data = fire_data_sorted, x = ~state) |>
+  add_trace(type = 'histogram', marker = list(color = ~state)) |>
+  layout(title = "State-wise Home Fire Incidents (Sorted by Count)")
+
+```
