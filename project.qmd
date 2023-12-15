@@ -173,6 +173,7 @@ ggplot(summary_table, aes(x = Age.demographic, y = Cause, fill = Count)) +
        x = "Age Demographic",
        y = "Cause") +
   theme_minimal()  
+## address unknown => the unknown shows the highest corrrelation but we don't know about them 
 ```
 
 ```{r}
@@ -211,34 +212,73 @@ ggplot() +
                       name = "Incident Count", guide = "colorbar") +
   labs(title = "Home Fire Incidents Across US States") +
   theme_minimal() +
-  theme(legend.position = "bottom")
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+    legend.position = "bottom")
 
 # why one state has more incidents than others => population + type of resident 
 # => investigate that to go further => answer this question 
+# incident rate instead of incident counts 
 
 ```
+
 
 ```{r}
-# Calculate counts per state
-state_counts <- data |>
-  count(state) |>
-  arrange(desc(n))  # Sort in descending order by count
+# Aggregate incident counts per state
+state_counts_2 <- df |>
+  group_by(state) |>
+  summarise(incident_count = sum(incident), population = first(population)) |>
+  rename(region = state)
 
-# Sort the original data frame by state counts
-fire_data_sorted <- data |>
-  mutate(state = factor(state, levels = state_counts$state))  
+# Get the US state map data
+us_map <- map_data("state")
 
-# Create an interactive bar chart for state-wise incidents sorted by count
-plot_ly(data = fire_data_sorted, x = ~state) |>
-  add_trace(type = 'histogram', marker = list(color = ~state)) |>
-  layout(title = "State-wise Home Fire Incidents (Sorted by Count)")
+# Harmonize state names in the map data
+ us_map$region <- str_to_title(us_map$region)
 
+# Merge the incident counts with map data
+merged_data_3 <- merge(us_map, state_counts_2, by = "region", all.x = TRUE)
+
+# Calculate incident ratio per population
+merged_data_3$ratio <- merged_data_3$incident_count / merged_data_3$population
+
+# Plotting the map with incident ratio
+ggplot() +
+  geom_map(data = merged_data_3, map = merged_data_3,
+           aes(map_id = region, fill = ratio),
+           color = "black") +
+  expand_limits(x = merged_data_3$long, y = merged_data_3$lat) +
+  scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
+                      name = "Incident Ratio", guide = "colorbar") +
+  labs(title = "Home Fire Incident Ratio Across US States") +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom")
+
+
+## problem with the long and lat => the map is not perfect but it is more menaning
 ```
 
+
+```{r}
+# Calculate incident counts per state
+state_counts <- data %>%
+  count(State = tools::toTitleCase(state)) %>%
+  rename(region = State, incident_count = n)
+
+# Merge incident counts with population data (assuming X2020_census is the population column)
+merged_data_2 <- state_counts %>%
+  left_join(select(data, state, X2020_census), by = c("region" = "state")) |>
+  rename(population = X2020_census, incident = incident_count) 
+
+```
 
 ```{r}
 # Create a correlation matrix
-correlation_matrix <- cor(merged_data_2[, c("Population", "Accidents")])
+correlation_matrix <- cor(merged_data_2[, c("population", "incident")])
 
 # Create a heatmap for the correlation matrix
 library(ggplot2)
@@ -252,10 +292,12 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
   theme_minimal()
 
 
+
+
 ```
 
 ```{r}
-ggplot(merged_data_2, aes(x = Population, y = Accidents, size = Accidents, color = Accidents)) +
+ggplot(merged_data_2, aes(x = population, y = incident, size = incident, color = incident)) +
   geom_point(alpha = 0.6) +
   scale_size_continuous(range = c(3, 15)) +
   scale_color_gradient(low = "blue", high = "red") +
@@ -263,19 +305,21 @@ ggplot(merged_data_2, aes(x = Population, y = Accidents, size = Accidents, color
   theme_minimal()
 ```
 
-```{r}
-df <- left_join(data, merged_data_2, by = c("state" = "State") )
 
+```{r}
+unique <- merged_data_2 |> unique()
 ```
 
 ```{r}
-
-
+df <- inner_join(data, unique, join_by(state==region))
+df
+```
+```{r}
 # Group data by state and smoke alarms, summing up accidents
 grouped_data <- df %>%
   filter(Smoke.alarms != "Not reported") %>%
   group_by(state, Smoke.alarms) %>%
-  summarise(total_accidents = sum(Accidents)) %>%
+  summarise(total_accidents = sum(incident)) %>%
   filter(state %in% top_5_states)
 
 # Create a grouped bar plot
@@ -287,10 +331,12 @@ ggplot(grouped_data, aes(x = state, y = total_accidents, fill = Smoke.alarms)) +
         legend.position = "bottom")
 
 ```
+
+
 ```{r}
 grouped_data_residential <- df %>%
   group_by(state, Residential.building.type) %>%
-  summarise(total_accidents = sum(Accidents)) %>%
+  summarise(total_accidents = sum(incident)) %>%
   filter(state %in% top_5_states)
 
 # Create a grouped bar plot
