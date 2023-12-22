@@ -256,6 +256,7 @@ ggplot() +
   theme(axis.title = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
+        panel.grid = element_blank(),
         legend.position = "bottom")
 
 
@@ -291,7 +292,7 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
   labs(title="Correlation Heatmap between Accidents and Population per State", x="Variable", y="Variable") +
   theme_minimal()
 
-
+## Just need to show a table ( correlation matrix table) - too much plot the teacher said that, so a table will be more suitable
 
 
 ```
