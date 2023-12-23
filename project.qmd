@@ -1,8 +1,9 @@
 ---
 title: "My project"
-author: "Khang Nguyen Thanh"
-date: "2023-11-06"
-output: html_document
+date: today
+date-format: "dddd, [the] D[<sup style='font-size:65%;font-style:italic;'>th</sup>] [of] MMMM, YYYY"
+institute: Data Visualization
+author: "Thanh Khang Nguyen"
 ---
 
 ```{r}
@@ -11,28 +12,28 @@ library(ggplot2)
 library(conflicted)
 library(forcats)
 library(scales)
-library(plotly)
-library(leaflet)
 library(maps)
 ```
+
+## The first letter in legend, Plot must be in capital: some code need to be improve to meet it (incident)
 
 ## Data
 
 ```{r}
 df1 <- read.csv("data/incidents.csv")
-df1 
+head(df1)
 ```
 
 ```{r}
 df2 <- read.csv("data/state.csv")
-df2
+head(df2)
 ```
 
 ```{r}
 data <- left_join(df1,
           df2, 
           join_by( State == state_code)) 
-data
+head(data)
 
 ```
 
@@ -49,7 +50,7 @@ count(data,MFI, sort = TRUE)
 # Plotting Cause
 data |> 
   group_by(Cause) |>
-  filter(n() > 120) |> 
+  dplyr::filter(n() > 120) |> 
   ggplot(aes(y = fct_rev(fct_infreq(Cause)),fill=Cause)) +
   guides(fill = FALSE) +  # remove legend for fill 
   geom_bar() +
@@ -79,8 +80,8 @@ data |>
 fire_data <- data |>
   mutate(Incident_Date = as.Date(Date, format = "%m/%d/%Y")) |>
   mutate(Incident_Year = lubridate::year(Incident_Date)) |>
-  filter(!is.na(Incident_Year)) |>
-  filter(Cause != "Under investigation" & Cause != "Undetermined") |>
+  dplyr::filter(!is.na(Incident_Year)) |>
+  dplyr::filter(Cause != "Under investigation" & Cause != "Undetermined") |>
   group_by(Incident_Year, Cause) |>
   count(Cause)
 
@@ -109,7 +110,7 @@ cause_to_category <- data.frame(
 )
 
 # Merging the cause-to-category mapping with the fire data
-fire_data_with_categories <- merge(fire_data, cause_to_category, by = "Cause") |>  filter(Category != "Investigation")
+fire_data_with_categories <- merge(fire_data, cause_to_category, by = "Cause") |>  dplyr::filter(Category != "Investigation")
 
 ggplot(fire_data_with_categories, aes(x = Incident_Year, y = n, fill = Category)) +
   geom_area() +
@@ -124,7 +125,7 @@ fire_data$Incident_Year <- as.Date(paste0(fire_data$Incident_Year, "-01-01"))
 
 # Aggregate incident counts per year
 incident_counts_per_year <- fire_data %>%
-  filter(year(Incident_Year) != 2023) %>% 
+  dplyr::filter(year(Incident_Year) != 2023) %>% 
   group_by(Incident_Year) %>%
   summarise(Total_Incidents = sum(n))
 
@@ -150,14 +151,14 @@ ggplot(incident_counts_per_year, aes(x = Incident_Year, y = Total_Incidents)) +
 ```{r}
 # Filter data for only the top 5 causes
 fire_data_filtered <- fire_data_with_categories %>%
-  filter(Cause != "Under investigation" & Cause != "Undetermined") %>%
+  dplyr::filter(Cause != "Under investigation" & Cause != "Undetermined") %>%
   group_by(Cause) %>%
   summarise(Count = n()) %>%
   top_n(5, Count) %>%
   pull(Cause)
 
 top_causes <- data %>%
-  filter(Cause %in% fire_data_filtered)
+  dplyr::filter(Cause %in% fire_data_filtered)
 
 # Create a summary table for counts of incidents per Age Demographic and Cause
 summary_table <- top_causes %>%
@@ -175,13 +176,56 @@ ggplot(summary_table, aes(x = Age.demographic, y = Cause, fill = Count)) +
   theme_minimal()  
 ## address unknown => the unknown shows the highest corrrelation but we don't know about them 
 ```
+```{r}
+selected_columns <- 
+  data |>
+  select(Age.demographic, Age) |>
+  dplyr:: filter(Age.demographic == "Unknown")
+```
+
+```{r}
+# Creating a new column for age category
+selected_columns$Age_Category <- ifelse(selected_columns$Age == "Unknown", "Unknown", 
+                           ifelse(!is.na(as.numeric(selected_columns$Age)) & as.numeric(selected_columns$Age) >= 18 & as.numeric(selected_columns$Age) <= 64 , "Adult (18-64)", NA))
+selected_columns$Age_Category[is.na(selected_columns$Age_Category)] <- "Not Adult"
+```
+```{r}
+selected_columns |> 
+  group_by(Age_Category) |>
+  ggplot(aes(y = fct_rev(fct_infreq(Age_Category)),fill=Age_Category)) +
+  guides(fill = FALSE) +  # remove legend for fill 
+  geom_bar() +
+  geom_text(stat="count",aes(label = scales::comma(after_stat(count))), vjust = -0.5,size = 3) +
+  labs(title = "Age Demographic for Unknow age",
+       x = "Count",
+       y = "Age Category") +
+  theme_classic() 
+```
+
+```{r}
+selected_columns |>
+  group_by(Age_Category) |>
+  summarize(count = n()) |>
+  ggplot(aes(x = "", y = count, fill = Age_Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = scales::comma(count)), position = position_stack(vjust = 0.5), size = 3) +
+  labs(title = "Age Demographic for Unknown Age",
+       x = NULL,
+       y = NULL) +
+  theme_void() +
+  theme(legend.position = "right")
+
+
+```
+
 
 ```{r}
 state_counts <- data |>
   count(state) |>
   rename(region = state, incident_count = n)
-state_counts
 ```
+
 
 ```{r}
 # Aggregate incident counts per state
@@ -225,6 +269,27 @@ ggplot() +
 
 
 ```{r}
+# Calculate incident counts per state
+state_counts <- data %>%
+  count(State = tools::toTitleCase(state)) %>%
+  rename(region = State, incident_count = n)
+
+# Merge incident counts with population data (assuming X2020_census is the population column)
+merged_data_2 <- state_counts %>%
+  left_join(select(data, state, X2020_census), by = c("region" = "state")) |>
+  rename(population = X2020_census, incident = incident_count) 
+
+```
+
+```{r}
+unique <- merged_data_2 |> unique()
+```
+
+```{r}
+df <- inner_join(data, unique, join_by(state==region))
+```
+
+```{r}
 # Aggregate incident counts per state
 state_counts_2 <- df |>
   group_by(state) |>
@@ -244,13 +309,12 @@ merged_data_3 <- merge(us_map, state_counts_2, by = "region", all.x = TRUE)
 merged_data_3$ratio <- merged_data_3$incident_count / merged_data_3$population
 
 # Plotting the map with incident ratio
-ggplot() +
-  geom_map(data = merged_data_3, map = merged_data_3,
-           aes(map_id = region, fill = ratio),
-           color = "black") +
+
+ggplot(merged_data_3, aes(map_id = region)) +
+  geom_map(map = merged_data_3, aes(fill = ratio), color = "black") +
   expand_limits(x = merged_data_3$long, y = merged_data_3$lat) +
   scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
-                      name = "Incident Ratio", guide = "colorbar") +
+                      name = "Incident Ratio") +
   labs(title = "Home Fire Incident Ratio Across US States") +
   theme_minimal() +
   theme(axis.title = element_blank(),
@@ -260,21 +324,31 @@ ggplot() +
         legend.position = "bottom")
 
 
+
 ## problem with the long and lat => the map is not perfect but it is more menaning
+```
+```{r}
+ggplot(merged_data_3, aes(map_id = region)) +
+  geom_map(aes(fill = ratio), map = map_data("state"), color = "black") +
+  expand_limits(x = merged_data_3$long, y = merged_data_3$lat) +
+  scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
+                      name = "Incident Ratio") +
+  labs(title = "Home Fire Incident Ratio Across US States") +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "bottom")
 ```
 
 
 ```{r}
-# Calculate incident counts per state
-state_counts <- data %>%
-  count(State = tools::toTitleCase(state)) %>%
-  rename(region = State, incident_count = n)
+# Finding the state with high population but fewer incidents
+state_with_low_incidents <- merged_data_3[which.min(merged_data_3$incident_count / merged_data_3$population), ]
 
-# Merge incident counts with population data (assuming X2020_census is the population column)
-merged_data_2 <- state_counts %>%
-  left_join(select(data, state, X2020_census), by = c("region" = "state")) |>
-  rename(population = X2020_census, incident = incident_count) 
-
+# Displaying the state information
+print(state_with_low_incidents)
 ```
 
 ```{r}
@@ -307,47 +381,6 @@ ggplot(merged_data_2, aes(x = population, y = incident, size = incident, color =
 ```
 
 
-```{r}
-unique <- merged_data_2 |> unique()
-```
-
-```{r}
-df <- inner_join(data, unique, join_by(state==region))
-df
-```
-```{r}
-# Group data by state and smoke alarms, summing up accidents
-grouped_data <- df %>%
-  filter(Smoke.alarms != "Not reported") %>%
-  group_by(state, Smoke.alarms) %>%
-  summarise(total_accidents = sum(incident)) %>%
-  filter(state %in% top_5_states)
-
-# Create a grouped bar plot
-ggplot(grouped_data, aes(x = state, y = total_accidents, fill = Smoke.alarms)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "Accidents Count based on Smoke Alarms",
-       x = "State", y = "Accidents Count", fill = "Smoke Alarms") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "bottom")
-
-```
-
-
-```{r}
-grouped_data_residential <- df %>%
-  group_by(state, Residential.building.type) %>%
-  summarise(total_accidents = sum(incident)) %>%
-  filter(state %in% top_5_states)
-
-# Create a grouped bar plot
-ggplot(grouped_data_residential, aes(x = state, y = total_accidents, fill = Residential.building.type)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "Accidents Count based on Residential Building Type",
-       x = "State", y = "Accidents Count", fill = "Residential Building Type") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "bottom")
-```
 
 
 
