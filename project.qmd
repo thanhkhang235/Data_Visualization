@@ -151,7 +151,8 @@ ggplot(incident_counts_per_year, aes(x = Incident_Year, y = Total_Incidents)) +
   theme_minimal()
 ```
 
-## Relationship between Age Demographic and Type of Incident 
+## Relationship between Age Demographic and Type of Fatalities
+ 
 ```{r}
 # Filter data for only the top 5 causes
 fire_data_filtered <- fire_data_with_categories |>
@@ -174,7 +175,7 @@ summary_table <- top_causes |>
 ggplot(summary_table, aes(x = Age.demographic, y = Cause, fill = Count)) +
   geom_tile() +
   scale_fill_gradient(low = "lightblue", high = "darkblue") +  # Adjust color gradient
-  labs(title = "Relationship between Age Demographic Vs Causes of Incident",
+  labs(title = "Relationship between Age Demographic Vs Causes of Fatalities",
        x = "Age Demographic",
        y = "Cause") +
   theme_minimal()  
@@ -265,11 +266,6 @@ ggplot() +
         axis.text = element_blank(),
         axis.ticks = element_blank(),
     legend.position = "bottom")
-
-# why one state has more incidents than others => population + type of resident 
-# => investigate that to go further => answer this question 
-# incident rate instead of incident counts 
-
 ```
 
 
@@ -291,48 +287,61 @@ unique <- merged_data_2 |> unique()
 ```
 
 ```{r}
-df <- inner_join(data, unique, join_by(state==region))
-```
-
-```{r}
-# Aggregate incident counts per state
-state_counts_2 <- df |>
-  group_by(state) |>
-  summarise(Incident_count = sum(incident), Population = first(population)) |>
-  rename(region = state)
-
 # Get the US state map data
 us_map <- map_data("state")
 
-# Harmonize state names in the map data
- us_map$region <- str_to_title(us_map$region)
+# Convert state names to lowercase for case-insensitive matching
+unique$region_lower <- tolower(unique$region)
+us_map$region_lower <- tolower(us_map$region)
 
-# Merge the incident counts with map data
-merged_data_3 <- merge(us_map, state_counts_2, by = "region", all.x = TRUE)
+# Merge the incident counts with map data using case-insensitive matching
+merged_data_3 <- merge(us_map, unique, by.x = "region_lower", by.y = "region_lower", all.x = TRUE)
+
+# Drop the auxiliary lowercase columns
+merged_data_3 <- merged_data_3[, !(names(merged_data_3) %in% c("region_lower.x", "region_lower.y"))]
+
 
 # Calculate incident ratio per population
-merged_data_3$ratio <- merged_data_3$Incident_count / merged_data_3$Population
+merged_data_3$ratio <- (merged_data_3$incident / merged_data_3$population) * 1000
 
-# Plotting the map with incident ratio
+# Impute missing values in the ratio column with zero
+merged_data_3$ratio[is.na(merged_data_3$ratio)] <- 0
+```
 
-ggplot(merged_data_3, aes(map_id = region)) +
-  geom_map(map = merged_data_3, aes(fill = ratio), color = "black") +
-  expand_limits(x = merged_data_3$long, y = merged_data_3$lat) +
+
+```{r}
+# Select only necessary columns for plotting
+plot_data <- merged_data_3[c("region_lower", "long", "lat", "ratio")]
+
+# Remove rows with missing values in the necessary columns
+plot_data <- plot_data[complete.cases(plot_data), ]
+
+# Adjust the color scale
+ggplot() +
+  geom_map(data = plot_data, map = plot_data,
+           aes(map_id = region_lower, fill = ratio),
+           color = "black") +
+  
+  expand_limits(x = plot_data$long, y = plot_data$lat) +
   scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
-                      name = "Incident Ratio") +
-  labs(title = "Home Fire Incident Ratio Across US States") +
+                      name = "Incident Ratio", guide = "colorbar") +
+  labs(title = "Home Fire Incidents Across US States") +
   theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        panel.grid = element_blank(),
         legend.position = "bottom")
 
-
-
-## problem with the long and lat => the map is not perfect but it is more menaning
 ```
-## Finding the State with high population but fewer incidents
+
+
+
+
+
+
+
+## Finding the State with high population but fewer Fatalities
+
 
 ```{r}
 # Finding the state with high population but fewer incidents
