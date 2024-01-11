@@ -266,8 +266,9 @@ ggplot() +
         axis.text = element_blank(),
         axis.ticks = element_blank(),
     legend.position = "bottom")
+## Comment: it just shows the population, does not show the real ration of incident per state 
 ```
-
+### Plotting ratio of number of (incident/ population) per state 
 
 ```{r}
 # Calculate incident counts per state
@@ -294,38 +295,41 @@ us_map <- map_data("state")
 unique$region_lower <- tolower(unique$region)
 us_map$region_lower <- tolower(us_map$region)
 
-# Merge the incident counts with map data using case-insensitive matching
-merged_data_3 <- merge(us_map, unique, by.x = "region_lower", by.y = "region_lower", all.x = TRUE)
+# Joining the data
+merged_data_3 <- left_join(us_map, unique, by = c("region_lower" = "region_lower"))
 
 # Drop the auxiliary lowercase columns
 merged_data_3 <- merged_data_3[, !(names(merged_data_3) %in% c("region_lower.x", "region_lower.y"))]
 
 
 # Calculate incident ratio per population
-merged_data_3$ratio <- (merged_data_3$incident / merged_data_3$population) * 1000
+merged_data_3$ratio <- (merged_data_3$incident / merged_data_3$population) * 10000
 
-# Impute missing values in the ratio column with zero
-merged_data_3$ratio[is.na(merged_data_3$ratio)] <- 0
 ```
 
 
 ```{r}
 # Select only necessary columns for plotting
 plot_data <- merged_data_3[c("region_lower", "long", "lat", "ratio")]
+# Find the minimum non-NA value in the 'ratio' column
+min_ratio_value <- min(plot_data$ratio, na.rm = TRUE)
+
+# Replace NA values with the minimum 'ratio' value
+plot_data$ratio[is.na(plot_data$ratio)] <- min_ratio_value
 
 # Remove rows with missing values in the necessary columns
 plot_data <- plot_data[complete.cases(plot_data), ]
 
-# Adjust the color scale
+# Adjust the color scale with log10 transformation
 ggplot() +
   geom_map(data = plot_data, map = plot_data,
            aes(map_id = region_lower, fill = ratio),
            color = "black") +
-  
   expand_limits(x = plot_data$long, y = plot_data$lat) +
   scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
-                      name = "Incident Ratio", guide = "colorbar") +
-  labs(title = "Home Fire Incidents Across US States") +
+                      name = "Incident Ratio", guide = "colorbar",
+                      trans = "log10") +  # Apply log10 transformation
+  labs(title = "Home Fire Fatalities Across US States") +
   theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text = element_blank(),
@@ -336,20 +340,6 @@ ggplot() +
 
 
 
-
-
-
-
-## Finding the State with high population but fewer Fatalities
-
-
-```{r}
-# Finding the state with high population but fewer incidents
-state_with_low_incidents <- merged_data_3[which.min(merged_data_3$Incident_count / merged_data_3$Population), ]
-
-# Displaying the state information
-print(state_with_low_incidents)
-```
 ## Correlation between population and number of incident per state 
 ```{r}
 # Create a correlation matrix
