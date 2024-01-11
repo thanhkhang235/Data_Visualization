@@ -1,5 +1,5 @@
 ---
-title: "My project"
+title: "My Exploratory plots for Data Visualization"
 date: today
 date-format: "dddd, [the] D[<sup style='font-size:65%;font-style:italic;'>th</sup>] [of] MMMM, YYYY"
 institute: Data Visualization
@@ -15,20 +15,19 @@ library(scales)
 library(maps)
 ```
 
-## The first letter in legend, Plot must be in capital: some code need to be improve to meet it (incident)
+## About the dataset
 
-## Data
-
+### Data 1: US Home Fire Fatalities in the News
 ```{r}
 df1 <- read.csv("data/incidents.csv")
 head(df1)
 ```
-
+### Data 2: us population by state
 ```{r}
 df2 <- read.csv("data/state.csv")
 head(df2)
 ```
-
+### Joing 2 dataset to get my final data
 ```{r}
 data <- left_join(df1,
           df2, 
@@ -36,6 +35,7 @@ data <- left_join(df1,
 head(data)
 
 ```
+## Exploring data 
 
 ```{r}
 count(data,Smoke.alarms, sort= TRUE)
@@ -45,6 +45,7 @@ count(data,MFI, sort = TRUE)
 ```
 
 ## Basic Plots
+### Type of Cause of Fire 
 
 ```{r}
 # Plotting Cause
@@ -60,23 +61,23 @@ data |>
        y = "Causes") +
   theme_classic() 
 ```
-
+### Fire by general property type 
 ```{r}
-# Fire by general property type 
 data |> 
   group_by(Residential.building.type) |>
   ggplot(aes(y = fct_rev(fct_infreq(Residential.building.type)),fill=Residential.building.type)) +
   guides(fill = FALSE) +  # remove legend for fill 
   geom_bar() +
   geom_text(stat="count",aes(label = scales::comma(after_stat(count))), vjust = -0.5,size = 3) +
-  labs(title = "Type of resident",
+  labs(title = "Type of Resident",
        x = "Count",
        y = "Type") +
   theme_classic() 
 ```
+## How Cause of Home Fire Fatalities has changed over the year ? 
 
+### Original Plot
 ```{r}
-
 fire_data <- data |>
   mutate(Incident_Date = as.Date(Date, format = "%m/%d/%Y")) |>
   mutate(Incident_Year = lubridate::year(Incident_Date)) |>
@@ -87,7 +88,7 @@ fire_data <- data |>
 
 causes_time <- ggplot(fire_data, aes(x = Incident_Year, y = n, fill = Cause)) +
   geom_col(position = "stack") +
-  labs(x = "Year of Incident", y = "Count", title = "Causes of Fire Incidents Since 2012") +
+  labs(x = "Year of Fatalities", y = "Count", title = "Causes of Fire Fatalities Since 2012") +
   theme_minimal() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank())
@@ -97,7 +98,8 @@ causes_time
 # or find a different type of map to show it ???
 ```
 
-
+### Improved Plot 
+Divide and combine into 3 meata-catagory: Behavioral, Equipment, Natural
 ```{r}
 # Creating a mapping of causes to broader categories
 cause_to_category <- data.frame(
@@ -114,11 +116,12 @@ fire_data_with_categories <- merge(fire_data, cause_to_category, by = "Cause") |
 
 ggplot(fire_data_with_categories, aes(x = Incident_Year, y = n, fill = Category)) +
   geom_area() +
-  labs(x = "Year of Incident", y = "Count", title = "Fire Incident Categories Since 2012") +
+  labs(x = "Year of Fatalities", y = "Count", title = "Fire Fatalities Categories Since 2012") +
   theme_minimal() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank())
 ```
+## How the total number of Fire Fatalities changed over the year 
 ```{r}
 # Convert 'Incident_year' to a proper date format
 fire_data$Incident_Year <- as.Date(paste0(fire_data$Incident_Year, "-01-01"))
@@ -142,40 +145,42 @@ incident_counts_per_year <- incident_counts_per_year %>%
 # Plotting the change in incident counts over the years
 ggplot(incident_counts_per_year, aes(x = Incident_Year, y = Total_Incidents)) +
   geom_line(color = "blue") +
-  labs(title = "Change in Incident Counts Over the Years",
+  labs(title = "Change in Fatalities Counts Over the Years",
        x = "Year",
-       y = "Total Incident Counts") +
+       y = "Total Fatalities Counts") +
   theme_minimal()
 ```
 
+## Relationship between Age Demographic and Type of Incident 
 ```{r}
 # Filter data for only the top 5 causes
-fire_data_filtered <- fire_data_with_categories %>%
-  dplyr::filter(Cause != "Under investigation" & Cause != "Undetermined") %>%
-  group_by(Cause) %>%
-  summarise(Count = n()) %>%
-  top_n(5, Count) %>%
+fire_data_filtered <- fire_data_with_categories |>
+  dplyr::filter(Cause != "Under investigation" & Cause != "Undetermined") |>
+  group_by(Cause) |>
+  summarise(Count = n()) |>
+  top_n(5, Count) |>
   pull(Cause)
 
-top_causes <- data %>%
+top_causes <- data |>
   dplyr::filter(Cause %in% fire_data_filtered)
 
 # Create a summary table for counts of incidents per Age Demographic and Cause
-summary_table <- top_causes %>%
-  group_by(Age.demographic, Cause) %>%
-  summarise(Count = n()) %>%
+summary_table <- top_causes |>
+  group_by(Age.demographic, Cause) |>
+  summarise(Count = n()) |>
   ungroup()
 
 # Create a heatmap for Age Demographic vs. Cause for top 5 causes
 ggplot(summary_table, aes(x = Age.demographic, y = Cause, fill = Count)) +
   geom_tile() +
   scale_fill_gradient(low = "lightblue", high = "darkblue") +  # Adjust color gradient
-  labs(title = "Relationship between Age Demographic Causes of Incidents",
+  labs(title = "Relationship between Age Demographic Vs Causes of Incident",
        x = "Age Demographic",
        y = "Cause") +
   theme_minimal()  
 ## address unknown => the unknown shows the highest corrrelation but we don't know about them 
 ```
+## Investigate the Unknown Age demegaphic 
 ```{r}
 selected_columns <- 
   data |>
@@ -218,7 +223,7 @@ selected_columns |>
 
 
 ```
-
+## Fire Fatalities distribution by state 
 
 ```{r}
 state_counts <- data |>
@@ -270,8 +275,8 @@ ggplot() +
 
 ```{r}
 # Calculate incident counts per state
-state_counts <- data %>%
-  count(State = tools::toTitleCase(state)) %>%
+state_counts <- data |>
+  count(State = tools::toTitleCase(state)) |>
   rename(region = State, incident_count = n)
 
 # Merge incident counts with population data (assuming X2020_census is the population column)
@@ -293,7 +298,7 @@ df <- inner_join(data, unique, join_by(state==region))
 # Aggregate incident counts per state
 state_counts_2 <- df |>
   group_by(state) |>
-  summarise(incident_count = sum(incident), population = first(population)) |>
+  summarise(Incident_count = sum(incident), Population = first(population)) |>
   rename(region = state)
 
 # Get the US state map data
@@ -306,7 +311,7 @@ us_map <- map_data("state")
 merged_data_3 <- merge(us_map, state_counts_2, by = "region", all.x = TRUE)
 
 # Calculate incident ratio per population
-merged_data_3$ratio <- merged_data_3$incident_count / merged_data_3$population
+merged_data_3$ratio <- merged_data_3$Incident_count / merged_data_3$Population
 
 # Plotting the map with incident ratio
 
@@ -327,30 +332,16 @@ ggplot(merged_data_3, aes(map_id = region)) +
 
 ## problem with the long and lat => the map is not perfect but it is more menaning
 ```
-```{r}
-ggplot(merged_data_3, aes(map_id = region)) +
-  geom_map(aes(fill = ratio), map = map_data("state"), color = "black") +
-  expand_limits(x = merged_data_3$long, y = merged_data_3$lat) +
-  scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
-                      name = "Incident Ratio") +
-  labs(title = "Home Fire Incident Ratio Across US States") +
-  theme_minimal() +
-  theme(axis.title = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid = element_blank(),
-        legend.position = "bottom")
-```
-
+## Finding the State with high population but fewer incidents
 
 ```{r}
 # Finding the state with high population but fewer incidents
-state_with_low_incidents <- merged_data_3[which.min(merged_data_3$incident_count / merged_data_3$population), ]
+state_with_low_incidents <- merged_data_3[which.min(merged_data_3$Incident_count / merged_data_3$Population), ]
 
 # Displaying the state information
 print(state_with_low_incidents)
 ```
-
+## Correlation between population and number of incident per state 
 ```{r}
 # Create a correlation matrix
 correlation_matrix <- cor(merged_data_2[, c("population", "incident")])
@@ -363,20 +354,18 @@ correlation_melted <- melt(correlation_matrix)
 ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
   geom_tile() +
   scale_fill_gradient(low="lightblue", high="darkblue", name="Correlation") +
-  labs(title="Correlation Heatmap between Accidents and Population per State", x="Variable", y="Variable") +
+  labs(title="Correlation Heatmap Between Incidents And Population Per State", x="Variable", y="Variable") +
   theme_minimal()
 
-## Just need to show a table ( correlation matrix table) - too much plot the teacher said that, so a table will be more suitable
-
-
+## Just need to show a table ( correlation matrix table) in final product 
 ```
-
+## Bubble Visualtion for the correlation 
 ```{r}
 ggplot(merged_data_2, aes(x = population, y = incident, size = incident, color = incident)) +
   geom_point(alpha = 0.6) +
   scale_size_continuous(range = c(3, 15)) +
   scale_color_gradient(low = "blue", high = "red") +
-  labs(title = "Accidents and Population per State", x = "Population", y = "Accidents") +
+  labs(title = "Incidents and Population per State", x = "Population", y = "Incidents") +
   theme_minimal()
 ```
 
