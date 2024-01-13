@@ -13,6 +13,7 @@ library(conflicted)
 library(forcats)
 library(scales)
 library(maps)
+library(psych)
 ```
 
 ## About the dataset
@@ -36,6 +37,15 @@ head(data)
 
 ```
 ## Exploring data 
+
+```{r}
+## Get basic information 
+summary(data)
+```
+```{r}
+describe(data)
+```
+
 
 ```{r}
 count(data,Smoke.alarms, sort= TRUE)
