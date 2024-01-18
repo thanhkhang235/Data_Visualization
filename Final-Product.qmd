@@ -1,0 +1,113 @@
+---
+title: "Data Visualization"
+format: 
+  revealjs:
+    slide-number: c/t #< collapsed/total
+    author: Thanh Khang Nguyen
+    date: 2024-01-26
+    width: 1600
+    height: 900
+    logo: "https://www.rstudio.com/wp-content/uploads/2018/10/RStudio-Logo-Flat.png"
+    css: ["theme/theme.css"]
+    theme: serif
+    echo: true
+---
+
+# Introduction 
+
+## My data 
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+#### **Dataset 1:**  US Home Fire Fatalities in the News
+
+**Source:** Kaggle 
+
+**Description:** Information on home fire fatalities is compiled through a daily internet search (Monday-Friday) of U.S. news media reports.
+
+:::
+
+::: {.column width="40%"}
+
+#### **Dataset 2:** US Population by State
+
+**Source:** Kaggle
+
+**Description:** The population of the US for each state (2020 census)
+
+:::
+
+::::
+
+:::{.callout-tip icon=false}
+
+#### Objective
+
+The primary purpose of this information is to help raise awareness about the danger of fire and the frequency of home fire death.
+
+:::
+
+# **Exploratory plots**
+
+## Type of Cause
+
+![](img/Type-of-cause.png){fig-align="center"}
+
+## Type of Resident
+
+![](img/Type-of-resident.png){fig-align="center" width="1400"}
+
+# How number of incidents has changed ? 
+
+## Change in total number 
+
+![](img/Change-in-number.png){fig-alt="Number of incidents changed in quantity" fig-align="center"}
+
+## Change in type of cause 
+
+![](img/Meta-cat.png){fig-align="center" width="1300"}
+
+# Correlation Analysis 
+
+## Age Demographic vs Type of Cause of Fire 
+
+![](img/Age-vs-causes.png){fig-align="center"}
+
+### 
+
+## Unknown Age 
+
+![](img/Unknown-age.png){fig-align="center"}
+
+## Home Fire by State 
+
+![](img/map.png){fig-align="center"}
+
+## Incident vs Population 
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+![](img/Incident vs population.png){fig-align="center" width="1000"}
+
+:::
+
+::: {.column width="40%"}
+
+|            | Population | Incident  |
+|------------|------------|-----------|
+| Incident   | 0.7661651  | 1.0000000 |
+| Population | 1.0000000  | 0.7661651 |
+
+:::
+
+::::
+
+## Bubble Plot 
+
+![](img/Bubble.png){fig-align="center" width="1300"}
+
+# Thanks for your attention ! 
