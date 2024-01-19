@@ -1,5 +1,5 @@
 ---
-title: "Data Visualization"
+title: "US Home Fire Fatalities in the News"
 format: 
   revealjs:
     slide-number: c/t #< collapsed/total
