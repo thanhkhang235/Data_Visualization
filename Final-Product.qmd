@@ -9,47 +9,44 @@ format:
     height: 900
     logo: "https://www.rstudio.com/wp-content/uploads/2018/10/RStudio-Logo-Flat.png"
     css: ["theme/theme.css"]
-    theme: serif
+    theme: dark
     echo: true
 ---
 
-# Introduction 
+# Introduction {style="text-align: center;" background-color="#003062"}
 
-## My data 
+## My data
 
-:::: {.columns}
-
+::: columns
 ::: {.column width="60%"}
-
+::: {.callout-important appearance="minimal"}
 #### **Dataset 1:**  US Home Fire Fatalities in the News
 
 **Source:** Kaggle 
 
 **Description:** Information on home fire fatalities is compiled through a daily internet search (Monday-Friday) of U.S. news media reports.
-
+:::
 :::
 
 ::: {.column width="40%"}
-
+::: {.callout-important appearance="minimal"} 
 #### **Dataset 2:** US Population by State
 
 **Source:** Kaggle
 
 **Description:** The population of the US for each state (2020 census)
-
 :::
 
+::: 
 ::::
 
-:::{.callout-tip icon=false}
-
+::: {.callout-tip icon="false"}
 #### Objective
 
 The primary purpose of this information is to help raise awareness about the danger of fire and the frequency of home fire death.
-
 :::
 
-# **Exploratory plots**
+# **Exploratory plots** {style="text-align: center;" background-color="#003062"}
 
 ## Type of Cause
 
@@ -59,55 +56,55 @@ The primary purpose of this information is to help raise awareness about the dan
 
 ![](img/Type-of-resident.png){fig-align="center" width="1400"}
 
-# How number of incidents has changed ? 
+# How number of incidents has changed ? {style="text-align: center;" background-color="#003062"}
 
-## Change in total number 
+## Change in total number
 
 ![](img/Change-in-number.png){fig-alt="Number of incidents changed in quantity" fig-align="center"}
 
-## Change in type of cause 
+## Change in type of cause
 
 ![](img/Meta-cat.png){fig-align="center" width="1300"}
 
-# Correlation Analysis 
+# Correlation Analysis {style="text-align: center;" background-color="#003062"}
 
-## Age Demographic vs Type of Cause of Fire 
+## Age Demographic vs Type of Cause of Fire
 
-![](img/Age-vs-causes.png){fig-align="center"}
+::: columns
+::: {.column width="50%"}
+#### Correlation Heatmap
 
-### 
+![](img/Age-vs-cause.png){fig-align="center"}
+:::
 
-## Unknown Age 
+::: {.column width="50%"}
+#### Unknown Age Distribution
 
 ![](img/Unknown-age.png){fig-align="center"}
+:::
+:::
 
-## Home Fire by State 
+## Home Fire by State
 
 ![](img/map.png){fig-align="center"}
 
-## Incident vs Population 
+## Incident vs Population
 
-:::: {.columns}
-
+::: columns
 ::: {.column width="60%"}
-
-![](img/Incident vs population.png){fig-align="center" width="1000"}
-
+![](img/Incident%20vs%20population.png){fig-align="center" width="1000"}
 :::
 
 ::: {.column width="40%"}
-
 |            | Population | Incident  |
 |------------|------------|-----------|
 | Incident   | 0.7661651  | 1.0000000 |
 | Population | 1.0000000  | 0.7661651 |
-
+:::
 :::
 
-::::
-
-## Bubble Plot 
+## Bubble Plot
 
 ![](img/Bubble.png){fig-align="center" width="1300"}
 
-# Thanks for your attention ! 
+# Thanks for your attention ! {style="text-align: center;" background-color="#003062"}
