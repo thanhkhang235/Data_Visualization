@@ -313,7 +313,8 @@ ggplot() +
         axis.text = element_blank(),
         axis.ticks = element_blank(),
     legend.position = "bottom")
-## Comment: it just shows the population, does not show the real ration of incident per state 
+## Comment: it just shows the population, does not show the real ratio of incident per state 
+## So I replot the Incident per State in the next part
 ```
 ### Plotting ratio of number of (incident/ population) per state 
 
@@ -342,7 +343,7 @@ us_map <- map_data("state")
 unique$region_lower <- tolower(unique$region)
 us_map$region_lower <- tolower(us_map$region)
 
-# Fix the mismatch for Washington, D.C.
+# Fix the mismatch for Washington, D.C.( mannualy)
 us_map$region_lower[us_map$region_lower == "district of columbia"] <- "dc"
 
 # Joining the data
@@ -389,7 +390,8 @@ setdiff(unique_regions_us_map, unique_regions_merged_data_2)
 ```{r}
 setdiff(unique$region_lower, us_map$region_lower)
 ```
-## I can not fix it, I don't understand why they have the same length in region (49 state), but they are not match 100%, so there are 2 missing values in the map plot: alaska and hawaii 
+## I can not fix it, I don't understand why they have the same length in region (49 state), but they are not match 100%, so there are 2 missing values in the map plot: alaska and hawaii. 
+## This maybe the differnt included in 2 dataset, so I skip for the ratio of 2 states Alaska and hawaii 
 
 ```{r}
 # Select only necessary columns for plotting
@@ -436,7 +438,9 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 ## Bubble Visualtion for the correlation 
 
+
 ```{r}
+## Just to check the correlation 
 ggplot(merged_data_2, aes(x = population, y = incident, size = incident, color = incident)) +
   geom_point(alpha = 0.6) +
   scale_size_continuous(range = c(3, 15)) +
