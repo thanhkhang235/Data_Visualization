@@ -390,7 +390,7 @@ setdiff(unique_regions_us_map, unique_regions_merged_data_2)
 ```{r}
 setdiff(unique$region_lower, us_map$region_lower)
 ```
-## I can not fix it, I don't understand why they have the same length in region (49 state), but they are not match 100%, so there are 2 missing values in the map plot: alaska and hawaii. 
+## I can not fix it, I don't understand why they have the same length in region columnn (49 states), but they are not match 100%, so there are 2 missing values in the map plot: alaska and hawaii. 
 ## This maybe the differnt included in 2 dataset, so I skip for the ratio of 2 states Alaska and hawaii 
 
 ```{r}
