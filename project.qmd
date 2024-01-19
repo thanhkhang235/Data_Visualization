@@ -138,9 +138,9 @@ ggplot(fire_data_with_categories, aes(x = Incident_Year, y = n, fill = Category)
 fire_data$Incident_Year <- as.Date(paste0(fire_data$Incident_Year, "-01-01"))
 
 # Aggregate incident counts per year
-incident_counts_per_year <- fire_data %>%
-  dplyr::filter(year(Incident_Year) != 2023) %>% 
-  group_by(Incident_Year) %>%
+incident_counts_per_year <- fire_data |>
+  dplyr::filter(year(Incident_Year) != 2023) |>
+  group_by(Incident_Year) |>
   summarise(Total_Incidents = sum(n))
 
 # Create a sequence of years covering the entire range
@@ -149,8 +149,8 @@ all_years <- seq(min(incident_counts_per_year$Incident_Year),
                  by = "year")
 
 # Ensure all years are included, filling missing years with 0 incidents
-incident_counts_per_year <- incident_counts_per_year %>%
-  complete(Incident_Year = all_years) %>%
+incident_counts_per_year <- incident_counts_per_year |>
+  complete(Incident_Year = all_years) |>
   mutate(Total_Incidents = replace_na(Total_Incidents, 0))
 
 # Plotting the change in incident counts over the years
