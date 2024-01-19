@@ -29,16 +29,15 @@ format:
 :::
 
 ::: {.column width="40%"}
-::: {.callout-important appearance="minimal"} 
+::: {.callout-important appearance="minimal"}
 #### **Dataset 2:** US Population by State
 
 **Source:** Kaggle
 
 **Description:** The population of the US for each state (2020 census)
 :::
-
-::: 
-::::
+:::
+:::
 
 ::: {.callout-tip icon="false"}
 #### Objective
