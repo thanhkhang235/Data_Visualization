@@ -75,7 +75,7 @@ The primary purpose of this information is to help raise awareness about the dan
 ::: {.column width="50%"}
 #### Unknown Age Distribution
 
-![](img/Unknown-age.png){fig-align="center"}
+![](img/Unknown Age.png){fig-align="center"}
 :::
 :::
 
