@@ -83,9 +83,9 @@ The primary purpose of this information is to help raise awareness about the dan
 
 ![](img/Smoke%20Alarm%20Col.png){fig-align="center"}
 
-## Home Fire by State
+## Home Fire Ratio by State
 
-![](img/Home Fire By State .png){fig-align="center"}
+![](img/Home%20Fire%20By%20State%20.png){fig-align="center"}
 
 ## Incident vs Population
 
