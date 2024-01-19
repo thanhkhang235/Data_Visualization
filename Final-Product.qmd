@@ -83,6 +83,10 @@ The primary purpose of this information is to help raise awareness about the dan
 :::
 :::
 
+## Smoke Alarms Status 
+
+![](img/Smoke Alarm Col.png){fig-align="center"}
+
 ## Home Fire by State
 
 ![](img/map.png){fig-align="center"}
