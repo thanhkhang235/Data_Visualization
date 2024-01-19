@@ -47,21 +47,17 @@ The primary purpose of this information is to help raise awareness about the dan
 
 # **Exploratory plots** {style="text-align: center;" background-color="#003062"}
 
-## Type of Cause
+## 
 
 ![](img/Type-of-cause.png){fig-align="center"}
 
-## Type of Resident
+# How number of incidents have changed ? {style="text-align: center;" background-color="#003062"}
 
-![](img/Type-of-resident.png){fig-align="center" width="1400"}
-
-# How number of incidents has changed ? {style="text-align: center;" background-color="#003062"}
-
-## Change in total number
+## In Total Number
 
 ![](img/Change-in-number.png){fig-alt="Number of incidents changed in quantity" fig-align="center"}
 
-## Change in type of cause
+## In Type of Cause
 
 ![](img/Meta-cat.png){fig-align="center" width="1300"}
 
@@ -71,7 +67,7 @@ The primary purpose of this information is to help raise awareness about the dan
 
 ::: columns
 ::: {.column width="50%"}
-#### Correlation Heatmap
+#### Top 5 Reasons for Each Age Demographic
 
 ![](img/Age-vs-cause.png){fig-align="center"}
 :::
@@ -83,13 +79,13 @@ The primary purpose of this information is to help raise awareness about the dan
 :::
 :::
 
-## Smoke Alarms Status 
+## 
 
-![](img/Smoke Alarm Col.png){fig-align="center"}
+![](img/Smoke%20Alarm%20Col.png){fig-align="center"}
 
 ## Home Fire by State
 
-![](img/map.png){fig-align="center"}
+![](img/Home Fire By State .png){fig-align="center"}
 
 ## Incident vs Population
 
@@ -105,9 +101,5 @@ The primary purpose of this information is to help raise awareness about the dan
 | Population | 1.0000000  | 0.7661651 |
 :::
 :::
-
-## Bubble Plot
-
-![](img/Bubble.png){fig-align="center" width="1300"}
 
 # Thanks for your attention ! {style="text-align: center;" background-color="#003062"}
