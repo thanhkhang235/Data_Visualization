@@ -342,15 +342,18 @@ us_map <- map_data("state")
 unique$region_lower <- tolower(unique$region)
 us_map$region_lower <- tolower(us_map$region)
 
+# Fix the mismatch for Washington, D.C.
+us_map$region_lower[us_map$region_lower == "district of columbia"] <- "dc"
+
 # Joining the data
 merged_data_3 <- left_join(us_map, unique, by = c("region_lower" = "region_lower"))
 
 # Drop the auxiliary lowercase columns
 merged_data_3 <- merged_data_3[, !(names(merged_data_3) %in% c("region_lower.x", "region_lower.y"))]
 
-
 # Calculate incident ratio per population
 merged_data_3$ratio <- (merged_data_3$incident / merged_data_3$population) * 10000
+
 
 ```
 
@@ -372,28 +375,34 @@ cat("Missing values in us_map:", missing_values_map, "\n")
 cat("Mismatched states:", mismatched_states, "\n")
 ```
 
+```{r}
+# Check unique values in region_lower column in merged_data_2
+unique_regions_merged_data_2 <- unique(merged_data_2$region)
+
+# Check unique values in region_lower column in us_map
+unique_regions_us_map <- unique(us_map$region_lower)
+
+# Compare unique values
+setdiff(unique_regions_merged_data_2, unique_regions_us_map)
+setdiff(unique_regions_us_map, unique_regions_merged_data_2)
+```
+```{r}
+setdiff(unique$region_lower, us_map$region_lower)
+```
+## I can not fix it, I don't understand why they have the same length in region (49 state), but they are not match 100%, so there are 2 missing values in the map plot: alaska and hawaii 
 
 ```{r}
 # Select only necessary columns for plotting
 plot_data <- merged_data_3[c("region_lower", "long", "lat", "ratio")]
-# Find the minimum non-NA value in the 'ratio' column
-min_ratio_value <- min(plot_data$ratio, na.rm = TRUE)
 
-# Replace NA values with the minimum 'ratio' value
-plot_data$ratio[is.na(plot_data$ratio)] <- min_ratio_value
-
-# Remove rows with missing values in the necessary columns
-plot_data <- plot_data[complete.cases(plot_data), ]
-
-# Adjust the color scale with log10 transformation
+# Adjust the color scale with a linear transformation
 ggplot() +
   geom_map(data = plot_data, map = plot_data,
            aes(map_id = region_lower, fill = ratio),
            color = "black") +
   expand_limits(x = plot_data$long, y = plot_data$lat) +
   scale_fill_gradient(low = "lightblue", high = "red", na.value = "grey50",
-                      name = "Incident Ratio", guide = "colorbar",
-                      trans = "log10") +  # Apply log10 transformation
+                      name = "Incident Ratio", guide = "colorbar") +  # Use linear scale
   labs(title = "Home Fire Fatalities Across US States") +
   theme_minimal() +
   theme(axis.title = element_blank(),
@@ -401,7 +410,7 @@ ggplot() +
         axis.ticks = element_blank(),
         legend.position = "bottom")
 
-```
+
 ```
 
 
@@ -424,7 +433,9 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 ## Just need to show a table ( correlation matrix table) in final product 
 ```
+
 ## Bubble Visualtion for the correlation 
+
 ```{r}
 ggplot(merged_data_2, aes(x = population, y = incident, size = incident, color = incident)) +
   geom_point(alpha = 0.6) +
