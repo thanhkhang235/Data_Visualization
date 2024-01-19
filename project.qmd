@@ -213,7 +213,7 @@ selected_columns |>
   guides(fill = FALSE) +  # remove legend for fill 
   geom_bar() +
   geom_text(stat="count",aes(label = scales::comma(after_stat(count))), vjust = -0.5,size = 3) +
-  labs(title = "Age Demographic for Unknow age",
+  labs(title = "Age Demographic for Unknow Age",
        x = "Count",
        y = "Age Category") +
   theme_classic() 
