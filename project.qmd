@@ -54,6 +54,7 @@ count(data,Residential.building.type, sort = TRUE)
 count(data,MFI, sort = TRUE)
 ```
 
+
 ## Basic Plots
 ### Type of Cause of Fire 
 
@@ -234,6 +235,42 @@ selected_columns |>
 
 
 ```
+## Smoke Alamrs 
+```{r}
+# Filter out "Not reported" category
+filtered_data <- data |>
+  filter(Smoke.alarms != "Not reported")
+
+# Create a polar bar chart with count values
+ggplot(filtered_data, aes(x = "", fill = factor(Smoke.alarms))) +
+  geom_bar(stat = "count", width = 1, color = "white") +
+  geom_text(
+    aes(label = ..count..),
+    stat = "count",
+    position = position_stack(vjust = 0.5),  # Adjust vertical position
+    color = "black", size = 3  # Customize text color and size
+  ) +
+  coord_polar("y", start = 0) +
+  theme_void() +  # Remove unnecessary elements
+  scale_fill_manual(values = c("skyblue", "lightgreen", "lightcoral", "lightyellow")) +
+  labs(title = "Composition of Smoke Alarm Status")
+```
+```{r}
+# Create a grouped bar chart
+ggplot(filtered_data, aes(x = "", fill = factor(Smoke.alarms))) +
+  geom_bar(position = "dodge") +
+  geom_text(
+    aes(label = ..count..),
+    stat = "count",
+    position = position_dodge(0.9),
+    color = "black", size = 3
+  ) +
+  theme_void() +
+  scale_fill_manual(values = c("skyblue", "lightgreen", "lightcoral", "lightyellow")) +
+  labs(title = "Composition of Smoke Alarm Status")
+```
+
+
 ## Fire Fatalities distribution by state 
 
 ```{r}
@@ -286,8 +323,8 @@ state_counts <- data |>
   count(State = tools::toTitleCase(state)) |>
   rename(region = State, incident_count = n)
 
-# Merge incident counts with population data (assuming X2020_census is the population column)
-merged_data_2 <- state_counts %>%
+# Merge incident counts with population data 
+merged_data_2 <- state_counts |>
   left_join(select(data, state, X2020_census), by = c("region" = "state")) |>
   rename(population = X2020_census, incident = incident_count) 
 
@@ -315,6 +352,24 @@ merged_data_3 <- merged_data_3[, !(names(merged_data_3) %in% c("region_lower.x",
 # Calculate incident ratio per population
 merged_data_3$ratio <- (merged_data_3$incident / merged_data_3$population) * 10000
 
+```
+
+
+
+```{r}
+# Check for missing values in merged_data_2
+missing_values <- sum(is.na(merged_data_2$incident) | is.na(merged_data_2$population))
+
+# Check for missing values in us_map
+missing_values_map <- sum(is.na(us_map$region_lower))
+
+# Check for mismatched state names
+mismatched_states <- setdiff(unique$region_lower, us_map$region_lower)
+
+# Print the results
+cat("Missing values in merged_data_2:", missing_values, "\n")
+cat("Missing values in us_map:", missing_values_map, "\n")
+cat("Mismatched states:", mismatched_states, "\n")
 ```
 
 
@@ -346,6 +401,7 @@ ggplot() +
         axis.ticks = element_blank(),
         legend.position = "bottom")
 
+```
 ```
 
 
