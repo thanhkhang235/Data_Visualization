@@ -45,6 +45,31 @@ format:
 The primary purpose of this information is to help raise awareness about the danger of fire and the frequency of home fire death.
 :::
 
+## Data Overview
+::::{.columns}
+::: {.column width="50%"}
+::: {.callout-tip appearance="simple" icon=false}
+- Number Of Observation: 24863
+- Number Of Column: 17 
+:::
+::: 
+::: {.column width="50%"}
+| Column Name     | Data Type  |
+|-----------------|------------|
+| Date            | character  |
+| State           | character  |
+| City            | character  |
+| Cause           | character  |
+| Description     | character  |
+| Gender          | character  |
+| Age             | character  |
+| Age.Demographic | character  |
+| Smoke.Alarms    | character  |
+| state           | character  |
+| X2020_census    | integer    |
+:::
+::::
+
 # **Exploratory plots** {style="text-align: center;" background-color="#003062"}
 
 ## 
