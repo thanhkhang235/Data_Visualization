@@ -45,6 +45,10 @@ summary(data)
 ```{r}
 describe(data)
 ```
+```{r}
+str(data)
+
+```
 
 
 ```{r}
