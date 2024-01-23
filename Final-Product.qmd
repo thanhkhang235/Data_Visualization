@@ -96,7 +96,7 @@ The primary purpose of this information is to help raise awareness about the dan
 ::: {.column width="50%"}
 #### Top 5 Reasons for Each Age Demographic
 
-![](img/Age-vs-cause.png){fig-align="center"}
+![](img/Age-vs-Cause.png){fig-align="center"}
 :::
 
 ::: {.column width="50%"}
