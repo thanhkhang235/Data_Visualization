@@ -15,7 +15,7 @@ format:
 
 # Introduction {style="text-align: center;" background-color="#003062"}
 
-## My data
+## My Data
 
 ::: columns
 ::: {.column width="60%"}
