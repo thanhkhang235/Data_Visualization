@@ -78,7 +78,7 @@ The primary purpose of this information is to help raise awareness about the dan
 
 ![](img/Type-of-cause.png){fig-align="center"}
 
-# How number of incidents have changed ? {style="text-align: center;" background-color="#003062"}
+# How the number of incidents have changed ? {style="text-align: center;" background-color="#003062"}
 
 ## In Total Number
 
