@@ -169,16 +169,17 @@ ggplot(incident_counts_per_year, aes(x = Incident_Year, y = Total_Incidents)) +
 ## Relationship between Age Demographic and Type of Fatalities
  
 ```{r}
-# Filter data for only the top 5 causes
-fire_data_filtered <- fire_data_with_categories |>
-  dplyr::filter(Cause != "Under investigation" & Cause != "Undetermined") |>
+
+fire_data_filtered <- data |>
+  filter(Cause != "Under investigation" & Cause != "Undetermined") |>
   group_by(Cause) |>
   summarise(Count = n()) |>
-  top_n(5, Count) |>
+  arrange(desc(Count)) |>
+  slice_head(n = 5) |>
   pull(Cause)
 
 top_causes <- data |>
-  dplyr::filter(Cause %in% fire_data_filtered)
+  filter(Cause %in% fire_data_filtered)
 
 # Create a summary table for counts of incidents per Age Demographic and Cause
 summary_table <- top_causes |>
@@ -194,8 +195,11 @@ ggplot(summary_table, aes(x = Age.demographic, y = Cause, fill = Count)) +
        x = "Age Demographic",
        y = "Cause") +
   theme_minimal()  
+
 ## address unknown => the unknown shows the highest corrrelation but we don't know about them 
 ```
+
+
 ## Investigate the Unknown Age demegaphic 
 ```{r}
 selected_columns <- 
@@ -243,7 +247,8 @@ selected_columns |>
 ```{r}
 # Filter out "Not reported" category
 filtered_data <- data |>
-  filter(Smoke.alarms != "Not reported")
+  filter(Smoke.alarms != "Not reported")  |>
+  filter(Cause == "Smoking")
 
 # Create a polar bar chart with count values
 ggplot(filtered_data, aes(x = "", fill = factor(Smoke.alarms))) +
@@ -260,18 +265,18 @@ ggplot(filtered_data, aes(x = "", fill = factor(Smoke.alarms))) +
   labs(title = "Composition of Smoke Alarm Status")
 ```
 ```{r}
-# Create a grouped bar chart
 ggplot(filtered_data, aes(x = "", fill = factor(Smoke.alarms))) +
   geom_bar(position = "dodge") +
   geom_text(
-    aes(label = ..count..),
+    aes(label = paste0(round((..count..)/sum(..count..) * 100), "%")),
     stat = "count",
     position = position_dodge(0.9),
-    color = "black", size = 3
+    color = "black", size = 3, vjust=6
   ) +
   theme_void() +
   scale_fill_manual(values = c("skyblue", "lightgreen", "lightcoral", "lightyellow")) +
   labs(title = "Composition of Smoke Alarm Status")
+
 ```
 
 
