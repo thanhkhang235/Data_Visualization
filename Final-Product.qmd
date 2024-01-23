@@ -72,7 +72,7 @@ The primary purpose of this information is to help raise awareness about the dan
 :::
 :::
 
-# **Exploratory plot** {style="text-align: center;" background-color="#003062"}
+# **Exploratory Plot** {style="text-align: center;" background-color="#003062"}
 
 ## 
 
