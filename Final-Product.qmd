@@ -114,7 +114,7 @@ The primary purpose of this information is to help raise awareness about the dan
 
 ![](img/Home%20Fire%20By%20State%20.png){fig-align="center"}
 
-## Incident vs Population
+## Incidents vs Population
 
 ::: columns
 ::: {.column width="60%"}
